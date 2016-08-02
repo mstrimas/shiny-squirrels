@@ -5,6 +5,7 @@ Shiny Squirrels in a dashboard for the Kluane Red Squirrel Project (KRSP) create
 1. [Download a ZIP file](https://github.com/mstrimas/shiny-squirrels/archive/master.zip) of the repository.
 2. Open the RStudio project `shiny-squirrels.Rproj`.
 3. Install the latest versions of the following packages:
+
   ```
   install.packages("devtools")
   devtools::install_github("mstrimas/krsp")
