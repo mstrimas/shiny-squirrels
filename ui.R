@@ -1,25 +1,33 @@
-library(shiny)
-
 shinyUI(fluidPage(
-
-  # Application title
-  titlePanel("Squirrel Rattle Locations"),
-
-  # Sidebar with a slider input for number of bins
+  
+  # titel panel
+  titlePanel("Squirrel Dashboard"),
+  
+  # use sidebar layout
   sidebarLayout(
+    
+    # sidebar
     sidebarPanel(
-      selectInput("grid", "Grid:", krsp:::grid_list()),
-      sliderInput("year",
-                  "Number of bins:",
-                  min = 1984,
-                  max = krsp:::current_year(),
-                  value = krsp:::current_year(),
-                  step = 1)
+      h1("Rattle Map"),
+      "Display a map of rattles from behaviour and trapping records.",
+      h3("Grid and year: "),
+      fluidRow(
+        column(6, selectInput("grid_input", NULL, grids)),
+        column(6, selectInput("year_input", NULL, years))
+      ),
+      actionButton("submit", "Submit"),
+      conditionalPanel(condition = "input.submit > 0",
+        h3("Filter"),
+        uiOutput("date_input"),
+        downloadButton('download_data', 'Download')
+      ),
+      width = 3
     ),
-
-    # Show a plot of the generated distribution
+    
+    # main panel
     mainPanel(
-      plotOutput("distPlot")
+      ggvisOutput("rattlemap_plot")
     )
-  )
+  ),
+  DT::dataTableOutput("rattlemap_table")
 ))
