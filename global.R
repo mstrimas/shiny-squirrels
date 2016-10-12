@@ -4,6 +4,7 @@ library(pool)
 library(krsp)
 library(ggvis)
 library(DT)
+library(sparkline)
 library(readr)
 library(dplyr)
 
