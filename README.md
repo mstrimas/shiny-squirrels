@@ -14,6 +14,7 @@ Shiny Squirrels in a dashboard for the Kluane Red Squirrel Project (KRSP) create
   devtools::install_github(pool)
   install.packages(ggvis)
   install.packages(DT)
+  devtools::install_github('htmlwidgets/sparkline')
   install.packages(readr)
   install.packages(dplyr)
   ```

@@ -195,11 +195,8 @@ shinyServer(function(input, output, session) {
   })
   # data table
   output$table_progress = DT::renderDataTable(
-    if (!is.null(progress())) {
-      krsp:::progress_datatable(progress())
-    } else {
-      NULL
-    }
+    if (!is.null(progress())) krsp:::progress_datatable(progress()) else NULL,
+    server = TRUE
   )
   
   ##########   Collars   ########## 
@@ -262,7 +259,7 @@ shinyServer(function(input, output, session) {
     } else if (input$type_input_checks == "Nests") {
       check_fun <- check_nest
     } else if (input$type_input_checks == "Collars") {
-      check_fun <- echeck_collars
+      check_fun <- check_collars
     } else if (input$type_input_checks == "Behaviour") {
       check_fun <- check_behaviour
     } else {
@@ -298,6 +295,21 @@ shinyServer(function(input, output, session) {
     rownames = FALSE,
     filter = "top"
   )
+  # data table - check descriptions
+  descriptions <- reactive({
+    filter(check_descriptions, Category == input$type_input_checks) %>% 
+      select(-Category)
+  })
+  output$table_checks_descriptions = DT::renderDataTable(
+    if (!is.null(descriptions())) descriptions() else NULL,
+    server = FALSE,
+    rownames = FALSE,
+    options = list(
+      info = FALSE,
+      paging = FALSE,
+      searching = FALSE,
+      ordering = FALSE
+    ))
   # download
   output$download_data_checks <- downloadHandler(
     filename = function() {
@@ -324,7 +336,7 @@ shinyServer(function(input, output, session) {
     if (input$metric_input_top == "trapping") {
       description <- "Rank according to the number of squirrels trapped"
     } else if (input$metric_input_top == "collars") {
-      description <- "Rank according to the number of collars put out."
+      description <- "Rank according to the number of new collars put on."
     } else if (input$metric_input_top == "behaviour") {
       description <- "Rank according to the number of behaviour observations."
     } else {
@@ -361,11 +373,7 @@ shinyServer(function(input, output, session) {
       results,
       class = 'nowrap stripe compact',
       rownames = FALSE,
-      fillContainer = TRUE,
       options = list(pageLength = 10,
-                     #autoWidth = TRUE,
-                     scrollY = FALSE,
-                     searching = FALSE,
                      info = FALSE),
       colnames = c(
         "Rank" = "rank",

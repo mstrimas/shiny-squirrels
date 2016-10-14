@@ -49,7 +49,10 @@ shinyUI(navbarPage(
       
       # main panel
       mainPanel(
-        DT::dataTableOutput("table_progress")
+        tabsetPanel(
+          tabPanel("Results", DT::dataTableOutput("table_progress")),
+          tabPanel("Help", progress_help)
+        )
       )
     )
   ),
@@ -81,7 +84,7 @@ shinyUI(navbarPage(
         p("Run data integrity checks on the field data. ",
           "This tool only highlights potential errors, ",
           "which will need to be manually fixed in the database."),
-        selectInput("grid_input_checks", "Grid:", c("All", "BASS", grids)),
+        selectInput("grid_input_checks", "Grid:", c("All", grids)),
         selectInput("year_input_checks", "Year:", years),
         selectInput("type_input_checks", "Check:", 
                     c("Trapping", "Nests", "Collars", "Behaviour")),
@@ -100,7 +103,19 @@ shinyUI(navbarPage(
       
       # main panel
       mainPanel(
-        DT::dataTableOutput("table_checks")
+        tabsetPanel(
+          tabPanel("Results", br(), DT::dataTableOutput("table_checks")),
+          tabPanel("Check Descriptions", br(), 
+                   p("Within each category, a variety of specific checks are ",
+                     "performed as noted in the",
+                     strong("check"),
+                     "column. A brief description of each check is given ",
+                     "below. Every check corresponds to a function in the ",
+                     a("krsp", href = "https://github.com/mstrimas/krsp"),
+                     " R package, and further details can be found in ",
+                     "documention for these functions."),
+                   DT::dataTableOutput("table_checks_descriptions"))
+        )
       )
     )
   ),
