@@ -329,6 +329,53 @@ shinyServer(function(input, output, session) {
     }
   )
   
+  ##########   Part Date Calculator   ########## 
+  
+  # display results
+  litter_data <- eventReactive(input$submit_pdate, {
+    weights <- rep(NA, 8)
+    for (i in 1:8) {
+      w <- input[[paste0("w", i)]]
+      weights[i] <- ifelse(is.numeric(w) & w > 0, w, NA)
+    }
+    weights
+  })
+  # litter size
+  output$littersize_pdate <- renderText({
+    if (is.null(litter_data())) return("-")
+    litter_size <- sum(!is.na(litter_data()))
+    litter_size
+  })
+  # mean weight
+  output$meanweight_pdate <- renderText({
+    if (is.null(litter_data())) return("-")
+    mean_weight <- mean(litter_data(), na.rm = T)
+    if (!is.na(mean_weight)) {
+      mean_weight <- round(mean_weight, 1)
+      format(mean_weight, nsmall = 1, scientific = FALSE)
+    } else {
+      mean_weight <- "-"
+    }
+    mean_weight
+  })
+  # part date
+  output$pdate_pdate <- renderText({
+    if (is.null(litter_data())) return("-")
+    mean_weight <- mean(litter_data(), na.rm = T)
+    if (is.na(mean_weight)) {
+      return("-")
+    }
+    growth_days <- max((mean_weight - 10) / 2, 0)
+    part_date <- input$n1date_pdate - round(growth_days)
+    if (input$usepreg_pdate) {
+      part_date <- max(part_date, input$preg_pdate)
+    }
+    if (input$uselac_pdate) {
+      part_date <- min(part_date, input$lac_pdate)
+    }
+    format(part_date, "%Y-%m-%d")
+  })
+  
   ##########   Top Squirrelers   ########## 
   
   # description of check

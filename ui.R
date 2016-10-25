@@ -44,7 +44,20 @@ shinyUI(navbarPage(
         selectInput("grid_input_progress", "Grid:", grids),
         selectInput("year_input_progress", "Year:", years),
         actionButton("submit_progress", "Submit"),
-        width = 2
+        conditionalPanel(condition = "input.submit_progress > 0",
+          h3("Colour key"),
+          p("The ", strong("Status"), "column is colour-coded as follows:"),
+          tags$table(
+            tags$tr(tags$td("Pregnant", bgcolor = "#E41A1C")),
+            tags$tr(tags$td("Nest in progress", bgcolor = "#FF7F00")),
+            tags$tr(tags$td("Nest completed", bgcolor = "#4DAF4A")),
+            tags$tr(tags$td("Lost litter", bgcolor = "#377EB8")),
+            tags$tr(tags$td("P0/Non-breeder", bgcolor = "#FFFFFF",
+                            style = "color: black; border: 1px solid black;")),
+            style = "width: 100%; color: white; font-weight: bold; text-align: center; padding: 10px;"
+          )
+        ),
+        width = 3
       ),
       
       # main panel
@@ -118,6 +131,71 @@ shinyUI(navbarPage(
         )
       )
     )
+  ),
+  
+  ##########   Part Date Calculator   ########## 
+  tabPanel("Part Date",
+    fluidRow(column(width = 6, offset = 3,
+      h2("Parturition Date Calculator"),
+      p("Estimate a litter's parturition date based on nest 1 weights. ",
+        "If available, specify the last date the female was confirmed pregnant ",
+        "and the first date she was confirmed lactating based on trapping events."),
+      p(strong("Nest 1 weights (grams):")),
+      fluidRow(
+        column(6, numericInput("w1", NA, NA, min = 1, max = 100, 
+                               step = 0.1, width = "100%")),
+        column(6, numericInput("w2", NA, NA, min = 1, max = 100, 
+                               step = 0.1, width = "100%"))
+      ),
+      fluidRow(
+        column(6, numericInput("w3", NA, NA, min = 1, max = 100, 
+                               step = 0.1, width = "100%")),
+        column(6, numericInput("w4", NA, NA, min = 1, max = 100, 
+                               step = 0.1, width = "100%"))
+      ),
+      fluidRow(
+        column(6, numericInput("w5", NA, NA, min = 1, max = 100, 
+                               step = 0.1, width = "100%")),
+        column(6, numericInput("w6", NA, NA, min = 1, max = 100, 
+                               step = 0.1, width = "100%"))
+      ),
+      fluidRow(
+        column(6, numericInput("w7", NA, NA, min = 1, max = 100, 
+                               step = 0.1, width = "100%")),
+        column(6, numericInput("w8", NA, NA, min = 1, max = 100, 
+                               step = 0.1, width = "100%"))
+      ),
+      fluidRow(
+        column(4, dateInput("n1date_pdate", "Nest 1 date:", value = Sys.Date(),
+                            min = "1987-01-01", max = Sys.Date() + 14)),
+        column(4, dateInput("preg_pdate", "Last pregnant:", value = Sys.Date(),
+                            min = "1987-01-01", max = Sys.Date() + 14)),
+        column(4, dateInput("lac_pdate", "First lactating:", value = Sys.Date(),
+                            min = "1987-01-01", max = Sys.Date() + 14))
+      ),
+      fluidRow( 
+        column(4, actionButton("submit_pdate", "Submit")),
+        column(4, checkboxInput("usepreg_pdate", "Use last pregnant date", 
+                                value = FALSE)),
+        column(4, checkboxInput("uselac_pdate", "Use first lactating date", 
+                                value = FALSE))
+      ),
+      hr(), 
+      conditionalPanel(condition = "input.submit_pdate > 0",
+        fluidRow(column(4, strong("Litter Size:"),
+                        textOutput("littersize_pdate")),
+                 column(4, strong("Mean weight:"),
+                        textOutput("meanweight_pdate")),
+                 column(4, strong("Parturition date:"),
+                        textOutput("pdate_pdate"))
+        ),
+        fluidRow(column(12,
+          p(strong("Note:"), "This calculation is an", strong("estimate"), 
+            " and should never supersede information from ",
+            strong("trapping events."))
+        ))
+      )
+    ))
   ),
   
   ##########   Top Squirrelers   ########## 
