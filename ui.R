@@ -133,6 +133,49 @@ shinyUI(navbarPage(
     )
   ),
   
+  ##########   Colour Keys   ########## 
+  tabPanel("Colour Keys",
+    sidebarLayout(
+      sidebarPanel(
+        h2("Colour Keys"),
+        p("Look up tags and most recent trapping location by colours. ",
+          "Female and male keys taken from most recent trapping event, ",
+          "juvenile key based on trapping and litter records."),
+        selectInput("grid_input_colours", "Grid:", grids),
+        selectInput("year_input_colours", "Year:", years),
+        fluidRow(
+          column(width = 6, actionButton("submit_colours", "Submit")),
+          column(width = 6,
+                 conditionalPanel(
+                   condition = "input.submit_colour > 0",
+                   downloadButton("download_data_colours", "Download")
+                 )
+          )
+        ),
+        hr(),
+        conditionalPanel(condition = "input.submit_colours > 0",
+                         textOutput("more_colours")),
+        width = 3
+      ),
+      
+      # main panel
+      mainPanel(
+        tabsetPanel(
+          tabPanel("Female", br(),
+                   div(DT::dataTableOutput("table_female_colours")),
+                   style = "font-size:80%"),
+          tabPanel("Male", br(),
+                   div(DT::dataTableOutput("table_male_colours")),
+                   style = "font-size:80%"),
+          tabPanel("Juvenile", br(),
+                   div(DT::dataTableOutput("table_juve_colours")),
+                   style = "font-size:80%"),
+          tabPanel("All", br(), DT::dataTableOutput("table_all_colours"))
+        )
+      )
+    )
+  ),
+  
   ##########   Part Date Calculator   ########## 
   tabPanel("Part Date",
     fluidRow(column(width = 6, offset = 3,

@@ -5,8 +5,9 @@ library(krsp)
 library(ggvis)
 library(DT)
 library(sparkline)
-library(readr)
 library(dplyr)
+library(readr)
+library(tidyr)
 
 pool <- dbPool(
   drv = RMySQL::MySQL(),
@@ -26,16 +27,8 @@ years <- kp(pool) %>%
   krsp:::year_list() %>% 
   sort(decreasing = TRUE)
 
-# ggvis plot for no data
-message_plot <- function(message = "No data found.") {
-  p <- data.frame(x = 0, y = 0.8, m = message) %>% 
-    ggvis(~x, ~y) %>% 
-    layer_text(text := ~m, fontSize := 30, font := "Helvetica Neue") %>% 
-    scale_numeric("y", domain = c(0, 1)) %>% 
-    hide_axis("x") %>% 
-    hide_axis("y")
-  return(p)
-}
+# valid colours
+valid_colours <- c("B", "R", "G", "Y", "O", "W", "P", "Bk", "Gy")
 
 # check query descriptions
 check_descriptions <- read_csv("check-descriptions.csv")
@@ -85,3 +78,14 @@ progress_help <- div(
     "N2 and Trap Status = P3. To avoid this, the field crew should ",
     "immediately create a new litter record once a squirrel is pregnant.")
 )
+
+# ggvis plot for no data
+message_plot <- function(message = "No data found.") {
+  p <- data.frame(x = 0, y = 0.8, m = message) %>% 
+    ggvis(~x, ~y) %>% 
+    layer_text(text := ~m, fontSize := 30, font := "Helvetica Neue") %>% 
+    scale_numeric("y", domain = c(0, 1)) %>% 
+    hide_axis("x") %>% 
+    hide_axis("y")
+  return(p)
+}

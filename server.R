@@ -329,6 +329,177 @@ shinyServer(function(input, output, session) {
     }
   )
   
+  ##########   Colour Keys   ########## 
+  
+  # data
+  colours <- eventReactive(input$submit_colours, {
+      krsp_colours(kp(pool),
+                   grid = input$grid_input_colours,
+                   year = input$year_input_colours)
+  })
+  # details on more colours
+  output$more_colours <-   renderText({
+    paste0(
+      "Note: Duplicate colours (i.e. more than one squirrel with the same ",
+      "colour combination) and non-standard colour combinations (i.e. more ",
+      "than one colour on a single ear or a mix of wires/pipes/bars) are not ",
+      "included in these keys. These cases will be visible in the All tab.")
+  })
+  
+  ## female
+  female_colours <- reactive({
+    if (!is.data.frame(colours())) {
+      return(NULL)
+    }
+    # filter to desired squirrels
+    card <- filter(colours(), sex == "F", !juvenile, standard, !duplicate, valid)
+    
+    card <- card %>% 
+      # combine tags and loc into single cell value
+      mutate(cell_value = sprintf("%s<br><strong>%s</strong>", tags, reflo)) %>% 
+      # convert to factors to ensure correct ordering
+      mutate(left = factor(left, levels = c('-', valid_colours)),
+             right = factor(right, levels = c('-', valid_colours))) %>% 
+      select(left, right, cell_value)
+    # transpose, long to wide
+    card <- spread(card, right, cell_value)
+    DT::datatable(card,
+                  rownames = FALSE,
+                  colnames = c("L/R" = "left"),
+                  escape = FALSE,
+                  class = 'nowrap stripe compact row-border',
+                  options = list(
+                    info = FALSE,
+                    paging = FALSE,
+                    searching = FALSE,
+                    ordering = FALSE,
+                    columnDefs = list(list(className = 'dt-center',
+                                           targets = 0:(ncol(card) - 1))))
+    ) %>% 
+    formatStyle("L/R", textAlign = "center", fontWeight = "bold") 
+  })
+  # output
+  output$table_female_colours = DT::renderDataTable(
+    if (!is.null(female_colours())) female_colours() else NULL,
+    server = FALSE)
+  
+  ## male
+  male_colours <- reactive({
+    if (!is.data.frame(colours())) {
+      return(NULL)
+    }
+    # filter to desired squirrels
+    card <- filter(colours(), sex == "M", !juvenile, standard, !duplicate, valid)
+    
+    card <- card %>% 
+      # combine tags and loc into single cell value
+      mutate(cell_value = sprintf("%s<br><strong>%s</strong>", tags, reflo)) %>% 
+      # convert to factors to ensure correct ordering
+      mutate(left = factor(left, levels = c('-', paste0(valid_colours, "!"))),
+             right = factor(right, levels = c('-', paste0(valid_colours, "!")))) %>% 
+      select(left, right, cell_value)
+    # transpose, long to wide
+    card <- spread(card, right, cell_value)
+    DT::datatable(card,
+                  rownames = FALSE,
+                  colnames = c("L/R" = "left"),
+                  escape = FALSE,
+                  class = 'nowrap stripe compact row-border',
+                  options = list(
+                    info = FALSE,
+                    paging = FALSE,
+                    searching = FALSE,
+                    ordering = FALSE,
+                    columnDefs = list(list(className = 'dt-center',
+                                           targets = 0:(ncol(card) - 1))))
+    ) %>% 
+      formatStyle("L/R", textAlign = "center", fontWeight = "bold") 
+  })
+  # output
+  output$table_male_colours = DT::renderDataTable(
+    if (!is.null(male_colours())) male_colours() else NULL,
+    server = FALSE)
+  
+    ## juvenile
+  juve_colours <- reactive({
+    if (!is.data.frame(colours())) {
+      return(NULL)
+    }
+    # filter to desired squirrels
+    card <- filter(colours(), juvenile, standard, !duplicate, valid)
+    
+    card <- card %>% 
+      # combine tags and loc into single cell value
+      mutate(cell_value = sprintf("%s<br><strong>%s</strong>", tags, reflo)) %>% 
+      # convert to factors to ensure correct ordering
+      mutate(left = factor(left, levels = c('-', paste0(valid_colours, "*"))),
+             right = factor(right, levels = c('-', paste0(valid_colours, "*")))) %>% 
+      select(left, right, cell_value)
+    # transpose, long to wide
+    card <- spread(card, right, cell_value)
+    DT::datatable(card,
+                  rownames = FALSE,
+                  colnames = c("L/R" = "left"),
+                  escape = FALSE,
+                  class = 'nowrap stripe compact row-border',
+                  options = list(
+                    info = FALSE,
+                    paging = FALSE,
+                    searching = FALSE,
+                    ordering = FALSE,
+                    columnDefs = list(list(className = 'dt-center',
+                                           targets = 0:(ncol(card) - 1))))
+    ) %>% 
+      formatStyle("L/R", textAlign = "center", fontWeight = "bold") 
+  })
+  # output
+  output$table_juve_colours = DT::renderDataTable(
+    if (!is.null(juve_colours())) juve_colours() else NULL,
+    server = FALSE)
+  
+  # all
+  output$table_all_colours = DT::renderDataTable(
+    if (!is.null(colours())) colours() else NULL,
+    server = TRUE,
+    options = list(
+      pageLength = 20,
+      autoWidth = TRUE,
+      searching = FALSE),
+    class = 'nowrap stripe compact',
+    rownames = FALSE,
+    colnames = c(
+      "Left" = "left",
+      "Right" = "right",
+      "ID" = "squirrel_id",
+      "Sex" = "sex",
+      "Juvenile" = "juvenile",
+      "Tags" = "tags",
+      "Colours" = "colours",
+      "Location" = "reflo",
+      "Last Trapped" = "last_trapped",
+      "Standard" = "standard",
+      "Duplicate" = "duplicate",
+      "Valid" = "valid")
+  )
+  
+  # download
+  output$download_data_colours <- downloadHandler(
+    filename = function() {
+      paste0("colours-",
+             tolower(input$grid_input_colours), "-",
+             input$year_input_colours,
+             ".csv")
+    },
+    content = function(file) {
+      data <- colours()
+      validate(
+        need(is.data.frame(data) & nrow(data) > 0, 
+             "No data to download")
+      )
+      write_csv(data, file)
+    }
+  )
+  
   ##########   Part Date Calculator   ########## 
   
   # display results
