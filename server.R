@@ -8,6 +8,7 @@ shinyServer(function(input, output, session) {
     kp(pool) %>%
       krsp_rattlemap(grid = input$grid_input_rattle, 
                      year = input$year_input_rattle, 
+                     middens = input$middens_rattle,
                      data = TRUE)
   })
   reverse_grid <- eventReactive(input$submit_rattle, {
@@ -148,7 +149,7 @@ shinyServer(function(input, output, session) {
   # data table
   output$table_rattle = DT::renderDataTable(
     if (!is.null(rattles_filtered())) {
-      rattles_filtered() %>% select(-id)
+      rattles_filtered() %>% select(-id) %>% mutate(source = factor(source))
     } else {NULL},
     server = TRUE,
     options = list(pageLength = 20, autoWidth = TRUE),
@@ -354,6 +355,10 @@ shinyServer(function(input, output, session) {
     # filter to desired squirrels
     card <- filter(colours(), sex == "F", !juvenile, standard, !duplicate, valid)
     
+    if (nrow(card) == 0) {
+      return(NULL)
+    }
+    
     card <- card %>% 
       # combine tags and loc into single cell value
       mutate(cell_value = sprintf("%s<br><strong>%s</strong>", tags, reflo)) %>% 
@@ -388,8 +393,13 @@ shinyServer(function(input, output, session) {
     if (!is.data.frame(colours())) {
       return(NULL)
     }
+    
     # filter to desired squirrels
     card <- filter(colours(), sex == "M", !juvenile, standard, !duplicate, valid)
+    
+    if (nrow(card) == 0) {
+      return(NULL)
+    }
     
     card <- card %>% 
       # combine tags and loc into single cell value
@@ -425,8 +435,14 @@ shinyServer(function(input, output, session) {
     if (!is.data.frame(colours())) {
       return(NULL)
     }
+    
     # filter to desired squirrels
     card <- filter(colours(), juvenile, standard, !duplicate, valid)
+    
+    
+    if (nrow(card) == 0) {
+      return(NULL)
+    }
     
     card <- card %>% 
       # combine tags and loc into single cell value
@@ -501,6 +517,43 @@ shinyServer(function(input, output, session) {
   )
   
   ##########   Part Date Calculator   ########## 
+  
+  observeEvent(input$lookup_pdate, {
+    # lookup litter weights
+    litter_lookup <- tryCatch({
+      krsp_litter_lookup(kp(pool),
+                         input$year_pdate,
+                         input$sid_pdate,
+                         input$ln_pdate)},
+      error = function(e) NULL)
+    if (!is.null(litter_lookup)) {
+      weights <- na.omit(litter_lookup$weight)
+      n1_date <- na.omit(litter_lookup$n1_date)[1]
+      # get first date lac and last date pregnant
+      lacpreg_date <- krsp:::lastpreg_firstlac(kp(pool), input$sid_pdate, 
+                                               n1_date)
+      # populate weights
+      for (i in seq_along(weights)) {
+        updateNumericInput(session, paste0("w", i), value = weights[i])
+      }
+      # populate dates
+      updateDateInput(session, "n1date_pdate", value = n1_date)
+      # last pregnant date
+      if (!is.na(lacpreg_date[1])) {
+        updateDateInput(session, "preg_pdate", value = lacpreg_date[1])
+        updateCheckboxInput(session, "usepreg_pdate", value = TRUE)
+      } else {
+        updateCheckboxInput(session, "usepreg_pdate", value = FALSE)
+      }
+      # first date lactating
+      if (!is.na(lacpreg_date[2])) {
+        updateDateInput(session, "lac_pdate", value = lacpreg_date[2])
+        updateCheckboxInput(session, "uselac_pdate", value = TRUE)
+      } else {
+        updateCheckboxInput(session, "uselac_pdate", value = FALSE)
+      }
+    }
+  })
   
   # display results
   litter_data <- eventReactive(input$submit_pdate, {

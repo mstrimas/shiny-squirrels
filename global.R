@@ -1,10 +1,12 @@
+#devtools::install_github("mstrimas/krsp")
+#devtools::install_github("rstudio/pool")
+
 library(shiny)
 library(DBI)
 library(pool)
 library(krsp)
 library(ggvis)
 library(DT)
-library(sparkline)
 library(dplyr)
 library(readr)
 library(tidyr)

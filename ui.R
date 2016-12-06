@@ -14,6 +14,10 @@ shinyUI(navbarPage(
           column(6, selectInput("grid_input_rattle", NULL, grids)),
           column(6, selectInput("year_input_rattle", NULL, years))
         ),
+        selectInput("middens_rattle", "Show middens?",
+                    c("No" = "none",
+                      "August census, last year" = "august",
+                      "May census, this year" = "may")),
         actionButton("submit_rattle", "Submit"),
         conditionalPanel(condition = "input.submit_rattle > 0",
           h3("Filter"),
@@ -28,7 +32,11 @@ shinyUI(navbarPage(
       # main panel
       mainPanel(
         tabsetPanel(
-          tabPanel("Map", ggvisOutput("plot_rattle")),
+          tabPanel("Map", ggvisOutput("plot_rattle"),
+                   conditionalPanel(condition = "input.submit_rattle > 0",
+                      p(strong("Note: "), "rattles appear as solid symbols, ",
+                        "middens as hollow symbols. Colours distinguish ",
+                        "different squirrels."))),
           tabPanel("Table", br(), DT::dataTableOutput("table_rattle"))
         )
       )
@@ -182,7 +190,23 @@ shinyUI(navbarPage(
       h2("Parturition Date Calculator"),
       p("Estimate a litter's parturition date based on nest 1 weights. ",
         "If available, specify the last date the female was confirmed pregnant ",
-        "and the first date she was confirmed lactating based on trapping events."),
+        "and the first date she was confirmed lactating based on trapping events.",
+        "Values can be populated from the database based on squirrel ID and ",
+        "litter number."),
+      p(strong("Look up squirrel:")),
+      fluidRow(
+        column(3, strong("Year:")),
+        column(3, strong("Squirrel ID:")),
+        column(3, strong("Litter #:"))
+      ),
+      fluidRow(
+        column(3, selectInput("year_pdate", NA, years)),
+        column(3, numericInput("sid_pdate", NA, NA, min = 1, max = 100000, 
+                               step = 1, width = "100%")),
+        column(3, numericInput("ln_pdate", NA, NA, min = 1, max = 4, 
+                               step = 1, width = "100%")),
+        column(3, actionButton("lookup_pdate", "Look Up"))
+      ),
       p(strong("Nest 1 weights (grams):")),
       fluidRow(
         column(6, numericInput("w1", NA, NA, min = 1, max = 100, 
@@ -219,9 +243,9 @@ shinyUI(navbarPage(
       fluidRow( 
         column(4, actionButton("submit_pdate", "Submit")),
         column(4, checkboxInput("usepreg_pdate", "Use last pregnant date", 
-                                value = FALSE)),
+                                value = TRUE)),
         column(4, checkboxInput("uselac_pdate", "Use first lactating date", 
-                                value = FALSE))
+                                value = TRUE))
       ),
       hr(), 
       conditionalPanel(condition = "input.submit_pdate > 0",
