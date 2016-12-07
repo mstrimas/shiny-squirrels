@@ -56,10 +56,11 @@ shinyUI(navbarPage(
           h3("Colour key"),
           p("The ", strong("Status"), "column is colour-coded as follows:"),
           tags$table(
-            tags$tr(tags$td("Pregnant", bgcolor = "#E41A1C")),
+            tags$tr(tags$td("Pregnant", bgcolor = "#4DAF4A")),
+            tags$tr(tags$td("Parturition", bgcolor = "#E41A1C")),
             tags$tr(tags$td("Nest in progress", bgcolor = "#FF7F00")),
-            tags$tr(tags$td("Nest completed", bgcolor = "#4DAF4A")),
-            tags$tr(tags$td("Lost litter", bgcolor = "#377EB8")),
+            tags$tr(tags$td("Nest completed", bgcolor = "#377EB8")),
+            tags$tr(tags$td("Lost litter", bgcolor = "#555555")),
             tags$tr(tags$td("P0/Non-breeder", bgcolor = "#FFFFFF",
                             style = "color: black; border: 1px solid black;")),
             style = "width: 100%; color: white; font-weight: bold; text-align: center; padding: 10px;"
@@ -97,7 +98,7 @@ shinyUI(navbarPage(
     )
   ),
   
-  ##########   Data Checking   ########## 
+  ##########   Data Checking   ##########
   tabPanel("Data Checking",
     sidebarLayout(
       sidebarPanel(
@@ -118,6 +119,10 @@ shinyUI(navbarPage(
                    downloadButton("download_data_checks", "Download")
                   )
           )
+        ),
+        br(),
+        conditionalPanel(condition = "input.submit_checks > 0",
+          uiOutput("date_input_checks")
         ),
         width = 3
       ),

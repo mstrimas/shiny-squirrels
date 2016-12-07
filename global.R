@@ -1,6 +1,4 @@
-#devtools::install_github("mstrimas/krsp")
 #devtools::install_github("rstudio/pool")
-
 library(shiny)
 library(DBI)
 library(pool)
@@ -8,15 +6,20 @@ library(krsp)
 library(ggvis)
 library(DT)
 library(dplyr)
-library(readr)
 library(tidyr)
+
+# database connection parameters
+dbname <- "krsp"
+host <- "localhost"
+username <- "root"
+password <- ""
 
 pool <- dbPool(
   drv = RMySQL::MySQL(),
-  dbname = "krsp",
-  host = "localhost",
-  username = "root",
-  password = ""
+  dbname = dbname,
+  host = host,
+  username = username,
+  password = password
 )
 # shortcut for krsp_pool
 kp <- krsp_pool
@@ -33,7 +36,8 @@ years <- kp(pool) %>%
 valid_colours <- c("B", "R", "G", "Y", "O", "W", "P", "Bk", "Gy")
 
 # check query descriptions
-check_descriptions <- read_csv("check-descriptions.csv")
+check_descriptions <- read.csv("check-descriptions.csv", 
+                               stringsAsFactors = FALSE)
 
 # progress help
 progress_help <- div(

@@ -252,6 +252,15 @@ shinyServer(function(input, output, session) {
     }
     p(em(description))
   })
+  # date range
+  output$date_input_checks <- renderUI({
+    sdate = paste0(input$year_input_checks, "-01-01")
+    edate = paste0(input$year_input_checks, "-12-31")
+    dateRangeInput("date_input_checks", "Restrict dates: ",
+                   start = sdate, end = edate,
+                   min = sdate, max = edate,
+                   separator = "-")
+  })
   # data
   checks <- eventReactive(input$submit_checks, {
     # determine which function to use
@@ -289,7 +298,12 @@ shinyServer(function(input, output, session) {
   })
   # data table
   output$table_checks = DT::renderDataTable(
-    if (!is.null(checks())) checks() else NULL,
+    if (!is.null(checks()) && !is.null(input$date_input_checks)) {
+      checks() %>% filter(date >= input$date_input_checks[1],
+                          date <= input$date_input_checks[2]) 
+    } else {
+      NULL
+    },
     server = TRUE,
     options = list(pageLength = 20, autoWidth = TRUE),
     class = 'nowrap stripe compact',
